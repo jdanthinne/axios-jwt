@@ -1,4 +1,26 @@
 "use strict";
+<<<<<<< HEAD
+=======
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+>>>>>>> fd16384 (Include dist/ folder)
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,12 +57,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+<<<<<<< HEAD
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authTokenInterceptor = exports.useAuthTokenInterceptor = exports.applyAuthTokenInterceptor = exports.refreshTokenIfNeeded = exports.getAccessToken = exports.getRefreshToken = exports.clearAuthTokens = exports.setAccessToken = exports.setAuthTokens = exports.isLoggedIn = exports.STORAGE_KEY = void 0;
 var jwt_decode_1 = __importDefault(require("jwt-decode"));
+=======
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authTokenInterceptor = exports.useAuthTokenInterceptor = exports.applyAuthTokenInterceptor = exports.refreshTokenIfNeeded = exports.getAccessToken = exports.getRefreshToken = exports.clearAuthTokens = exports.setAccessToken = exports.setAuthTokens = exports.isLoggedIn = exports.STORAGE_KEY = void 0;
+var jwt = __importStar(require("jsonwebtoken"));
+>>>>>>> fd16384 (Include dist/ folder)
 // a little time before expiration to try refresh (seconds)
 var EXPIRE_FUDGE = 10;
 exports.STORAGE_KEY = "auth-token-" + process.env.NODE_ENV;
@@ -97,7 +125,11 @@ exports.getRefreshToken = getRefreshToken;
  * Returns the stored access token
  * @returns {string} Access token
  */
+<<<<<<< HEAD
 var getAccessToken = function () { return (accessToken ? accessToken : undefined); };
+=======
+var getAccessToken = function () { return accessToken ? accessToken : undefined; };
+>>>>>>> fd16384 (Include dist/ folder)
 exports.getAccessToken = getAccessToken;
 /**
  * @callback requestRefresh
@@ -169,7 +201,11 @@ var isTokenExpired = function (token) {
  * @returns {string} Unix timestamp
  */
 var getTimestampFromToken = function (token) {
+<<<<<<< HEAD
     var decoded = jwt_decode_1.default(token);
+=======
+    var decoded = jwt.decode(token);
+>>>>>>> fd16384 (Include dist/ folder)
     return decoded === null || decoded === void 0 ? void 0 : decoded.exp;
 };
 /**
@@ -266,9 +302,13 @@ var authTokenInterceptor = function (_a) {
                                 queue.push({ resolve: resolve, reject: reject });
                             })
                                 .then(function (token) {
+<<<<<<< HEAD
                                 if (requestConfig.headers) {
                                     requestConfig.headers[header] = "" + headerPrefix + token;
                                 }
+=======
+                                requestConfig.headers[header] = "" + headerPrefix + token;
+>>>>>>> fd16384 (Include dist/ folder)
                                 return requestConfig;
                             })
                                 .catch(Promise.reject)];
@@ -283,6 +323,7 @@ var authTokenInterceptor = function (_a) {
                     return [3 /*break*/, 4];
                 case 3:
                     error_2 = _a.sent();
+<<<<<<< HEAD
                     if (error_2 instanceof Error) {
                         declineQueue(error_2);
                         throw new Error("Unable to refresh access token for request due to token refresh error: " + error_2.message);
@@ -291,6 +332,13 @@ var authTokenInterceptor = function (_a) {
                 case 4:
                     // add token to headers
                     if (accessToken && requestConfig.headers)
+=======
+                    declineQueue(error_2);
+                    throw new Error("Unable to refresh access token for request due to token refresh error: " + error_2.message);
+                case 4:
+                    // add token to headers
+                    if (accessToken)
+>>>>>>> fd16384 (Include dist/ folder)
                         requestConfig.headers[header] = "" + headerPrefix + accessToken;
                     return [2 /*return*/, requestConfig];
             }
