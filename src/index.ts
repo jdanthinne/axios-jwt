@@ -10,7 +10,7 @@ export interface IAuthTokens {
   accessToken: Token
   refreshToken: Token
 }
-let accessToken: Token | null = null;
+let accessToken: Token | null = null
 
 // EXPORTS
 
@@ -66,7 +66,7 @@ export const getRefreshToken = (): Token | undefined => {
  * Returns the stored access token
  * @returns {string} Access token
  */
-export const getAccessToken = (): Token | undefined => accessToken ? accessToken : undefined
+export const getAccessToken = (): Token | undefined => (accessToken ? accessToken : undefined)
 
 /**
  * @callback requestRefresh
@@ -115,7 +115,7 @@ const getAuthTokens = (): IAuthTokens | undefined => {
   const refreshToken = localStorage.getItem(STORAGE_KEY)
   if (!refreshToken || !accessToken) return
 
-  return {accessToken: accessToken, refreshToken: refreshToken}
+  return { accessToken: accessToken, refreshToken: refreshToken }
 }
 
 /**
@@ -181,16 +181,19 @@ const refreshToken = async (requestRefresh: TokenRefreshRequest): Promise<Token>
 
     throw new Error('requestRefresh must either return a string or an object with an accessToken')
   } catch (error) {
+    const errorQueue = error as Error
+
     // Failed to refresh token
     const status = error?.response?.status
+
     if (status === 401 || status === 422) {
       // The refresh token is invalid so remove the stored tokens
       localStorage.removeItem(STORAGE_KEY)
-      accessToken = null;
+      accessToken = null
       throw new Error(`Got ${status} on token refresh; clearing both auth tokens`)
     } else {
       // A different error, probably network error
-      throw new Error(`Failed to refresh auth token: ${error.message}`)
+      throw new Error(`Failed to refresh auth token: ${errorQueue.message}`)
     }
   } finally {
     isRefreshing = false
@@ -214,40 +217,41 @@ export interface IAuthTokenInterceptorConfig {
  * @param {IAuthTokenInterceptorConfig} config - Configuration for the interceptor
  * @returns {Promise} Promise that resolves in the supplied requestConfig
  */
-export const authTokenInterceptor = ({
-  header = 'Authorization',
-  headerPrefix = 'Bearer ',
-  requestRefresh,
-}: IAuthTokenInterceptorConfig) => async (requestConfig: AxiosRequestConfig): Promise<AxiosRequestConfig> => {
-  // We need refresh token to do any authenticated requests
-  if (!getRefreshToken()) return requestConfig
+export const authTokenInterceptor =
+  ({ header = 'Authorization', headerPrefix = 'Bearer ', requestRefresh }: IAuthTokenInterceptorConfig) =>
+  async (requestConfig: AxiosRequestConfig): Promise<AxiosRequestConfig> => {
+    // We need refresh token to do any authenticated requests
+    if (!getRefreshToken()) return requestConfig
 
-  // Queue the request if another refresh request is currently happening
-  if (isRefreshing) {
-    return new Promise((resolve, reject) => {
-      queue.push({ resolve, reject })
-    })
-      .then((token) => {
-        requestConfig.headers[header] = `${headerPrefix}${token}`
-        return requestConfig
+    // Queue the request if another refresh request is currently happening
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        queue.push({ resolve, reject })
       })
-      .catch(Promise.reject)
-  }
+        .then((token) => {
+          if (requestConfig.headers) {
+            requestConfig.headers[header] = `${headerPrefix}${token}`
+          }
+          return requestConfig
+        })
+        .catch(Promise.reject)
+    }
 
-  // Do refresh if needed
-  let accessToken
-  try {
-    accessToken = await refreshTokenIfNeeded(requestRefresh)
-    resolveQueue(accessToken)
-  } catch (error) {
-    declineQueue(error)
-    throw new Error(`Unable to refresh access token for request due to token refresh error: ${error.message}`)
-  }
+    // Do refresh if needed
+    let accessToken
+    try {
+      accessToken = await refreshTokenIfNeeded(requestRefresh)
+      resolveQueue(accessToken)
+    } catch (error) {
+      const errorQueue = error as Error
+      declineQueue(errorQueue)
+      throw new Error(`Unable to refresh access token for request due to token refresh error: ${errorQueue.message}`)
+    }
 
-  // add token to headers
-  if (accessToken) requestConfig.headers[header] = `${headerPrefix}${accessToken}`
-  return requestConfig
-}
+    // add token to headers
+    if (accessToken && requestConfig.headers) requestConfig.headers[header] = `${headerPrefix}${accessToken}`
+    return requestConfig
+  }
 
 type RequestsQueue = {
   resolve: (value?: unknown) => void
